@@ -1,0 +1,279 @@
+<div class="min-h-screen p-6 bg-gray-100">
+    <h2 class="text-3xl font-bold mb-6 text-gray-800">Admin Panel - Camera Inventory</h2>
+  
+    <div *ngIf="successMessage" class="bg-green-100 text-green-800 p-2 rounded mb-4">
+      {{ successMessage }}
+    </div>
+    <div *ngIf="error" class="bg-red-100 text-red-800 p-2 rounded mb-4">
+      {{ error }}
+    </div>
+  
+    <button
+      class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded mb-4"
+      (click)="openAddCameraModal()"
+    >
+      + Add New Product
+    </button>
+    <!-- Add Camera Modal -->
+<div
+*ngIf="showAddCameraModal"
+class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+>
+<div class="bg-white p-6 rounded shadow-lg w-full max-w-3xl relative">
+  <button
+    (click)="closeAddCameraModal()"
+    class="absolute top-2 right-2 text-gray-500 hover:text-gray-700 text-lg"
+  >
+    ✕
+  </button>
+
+      <h3 class="text-xl font-semibold mb-4">Add New Camera</h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <input [(ngModel)]="newCamera.name" placeholder="Camera Name" class="form-input" />
+        <input [(ngModel)]="newCamera.brand" placeholder="Brand" class="form-input" />
+        <input [(ngModel)]="newCamera.model" placeholder="Model" class="form-input" />
+
+        <select [(ngModel)]="newCamera.category" class="form-input">
+          <option value="DSLR">DSLR</option>
+          <option value="MIRRORLESS">Mirrorless</option>
+          <option value="GOPRO">Go Pro</option>
+          <option value="FILM">Film</option>
+          <option value="INSTANT">Instant</option>
+          <option value="LENS">Lens</option>
+          <option value="ACCESSORY">Accessory</option>
+        </select>
+
+        <input [(ngModel)]="newCamera.rentPerDay" type="number" placeholder="Rent Per Day" class="form-input" />
+        <input [(ngModel)]="newCamera.stockQuantity" type="number" placeholder="Stock Quantity" class="form-input" />
+
+        <textarea [(ngModel)]="newCamera.description" placeholder="Description" class="form-textarea md:col-span-2"></textarea>
+
+        <input [(ngModel)]="featureInput" placeholder="Features (comma-separated)" class="form-input md:col-span-2" />
+        <input [(ngModel)]="imageInput" placeholder="Image URLs (comma-separated)" class="form-input md:col-span-2" />
+      </div>
+
+      <div class="mt-4">
+        <label class="inline-flex items-center">
+          <input type="checkbox" [(ngModel)]="newCamera.availability" class="mr-2" />
+          Available
+        </label>
+      </div>
+
+      <button (click)="createNewCamera()" class="mt-4 btn-primary px-4 py-2 rounded">
+        Add Product
+      </button>
+    </div>
+    </div>
+
+    <!-- Camera List Table -->
+    <div class="overflow-x-auto">
+     <!-- Camera List Table -->
+<div class="overflow-x-auto">
+  <table class="min-w-full bg-white shadow-xl rounded-lg overflow-hidden border border-gray-200">
+    <thead class="bg-gradient-to-r from-gray-100 to-gray-200 text-gray-800 uppercase text-sm font-semibold">
+      <tr>
+        <th class="px-6 py-4 text-left">Name</th>
+        <th class="px-6 py-4 text-left">Brand</th>
+        <th class="px-6 py-4 text-left">Category</th>
+        <th class="px-6 py-4 text-left">Rent/Day</th>
+        <th class="px-6 py-4 text-left">Availability</th>
+        <th class="px-6 py-4 text-left">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr
+        *ngFor="let camera of cameras"
+        class="hover:bg-gray-50 transition duration-150 border-b last:border-none"
+      >
+        <td class="px-6 py-4 font-medium text-blue-700">
+          <button (click)="openDetailsModal(camera)" class="hover:underline">
+            {{ camera.name }}
+          </button>
+        </td>
+        <td class="px-6 py-4 text-gray-700">{{ camera.brand }}</td>
+        <td class="px-6 py-4 text-gray-700">{{ camera.category }}</td>
+        <td class="px-6 py-4 text-gray-900 font-semibold">₹{{ camera.rentPerDay }}</td>
+        <td class="px-6 py-4">
+          <span
+            [ngClass]="{
+              'bg-green-100 text-green-800': camera.availability,
+              'bg-red-100 text-red-800': !camera.availability
+            }"
+            class="px-2 py-1 text-xs font-medium rounded"
+          >
+            {{ camera.availability ? 'Available' : 'Unavailable' }}
+          </span>
+        </td>
+        <td class="px-6 py-4">
+          <div class="flex items-center gap-2">
+            <button
+              class="bg-gray-500 hover:bg-gray-600 text-white text-sm px-3 py-1 rounded shadow"
+              (click)="openEditModal(camera)"
+            >
+              Edit
+            </button>
+            <button
+              class="bg-red-500 hover:bg-red-600 text-white text-sm px-3 py-1 rounded shadow"
+              (click)="confirmDelete(camera)"
+            >
+              Delete
+            </button>
+          </div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+
+      <!-- Delete Confirmation Modal -->
+      <div *ngIf="cameraToDelete" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+        <div class="bg-white rounded-lg p-6 shadow-lg w-full max-w-md">
+          <h3 class="text-xl font-semibold mb-4 text-gray-800">Confirm Delete</h3>
+          <p class="mb-2 text-gray-700">
+            Are you sure you want to delete the following camera?
+          </p>
+          <ul class="mb-4 text-sm text-gray-600 list-disc pl-5">
+            <li><strong>Name:</strong> {{ cameraToDelete.brand }}</li>
+            <li><strong>Brand:</strong> {{ cameraToDelete.brand }}</li>
+            <li><strong>Category:</strong> {{ cameraToDelete.category }}</li>
+            <li><strong>Rent/Day:</strong> ₹{{ cameraToDelete.rentPerDay }}</li>
+          </ul>
+          <div class="flex justify-end gap-4">
+            <button (click)="cancelDelete()" class="px-4 py-2 rounded bg-gray-300 text-gray-800 hover:bg-gray-400">
+              Cancel
+            </button>
+            <button (click)="deleteConfirmed()" class="px-4 py-2 rounded bg-red-500 text-white hover:bg-red-600">
+              Confirm Delete
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Edit Camera Modal -->
+      <div *ngIf="editCameraData" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+        <div class="bg-white rounded-lg p-6 shadow-lg w-full max-w-2xl">
+          <h3 class="text-xl font-semibold mb-4 text-gray-800">Edit Camera</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <input [(ngModel)]="editCameraData.name" placeholder="Camera Name" class="form-input" />
+            <input [(ngModel)]="editCameraData.brand" placeholder="Brand" class="form-input" />
+            <input [(ngModel)]="editCameraData.model" placeholder="Model" class="form-input" />
+
+            <select [(ngModel)]="editCameraData.category" class="form-input">
+              <option value="DSLR">DSLR</option>
+              <option value="MIRRORLESS">Mirrorless</option>
+              <option value="GOPRO">Go Pro</option>
+              <option value="FILM">Film</option>
+              <option value="INSTANT">Instant</option>
+              <option value="LENS">Lens</option>
+              <option value="ACCESSORY">Accessory</option>
+            </select>
+
+            <input [(ngModel)]="editCameraData.rentPerDay" type="number" placeholder="Rent Per Day" class="form-input" />
+            <input [(ngModel)]="editCameraData.stockQuantity" type="number" placeholder="Stock Quantity" class="form-input" />
+
+            <textarea [(ngModel)]="editCameraData.description" placeholder="Description" class="form-textarea md:col-span-2"></textarea>
+            <input [(ngModel)]="editFeatureInput" placeholder="Features (comma-separated)" class="form-input md:col-span-2" />
+            <input [(ngModel)]="editImageInput" placeholder="Image URLs (comma-separated)" class="form-input md:col-span-2" />
+          </div>
+
+          <div class="mt-4 flex items-center space-x-4">
+            <label class="inline-flex items-center">
+              <input type="checkbox" [(ngModel)]="editCameraData.availability" class="mr-2" />
+              Available
+            </label>
+          </div>
+
+          <div class="mt-6 flex justify-end gap-4">
+            <button (click)="cancelEdit()" class="px-4 py-2 rounded bg-gray-300 text-gray-800 hover:bg-gray-400">
+              Cancel
+            </button>
+            <button (click)="saveEditedCamera()" class="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700">
+              Save Changes
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Camera Details Modal -->
+        <div 
+        *ngIf="showDetailsModal && selectedCamera" 
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+        >
+        <div class="bg-white rounded-lg shadow-lg w-full max-w-3xl p-6 relative overflow-y-auto max-h-[90vh]">
+          
+          <!-- Close button -->
+          <button 
+            class="absolute top-2 right-2 text-gray-600 hover:text-black text-2xl font-bold" 
+            (click)="closeDetailModal()"
+          >
+            &times;
+          </button>
+
+          <h2 class="text-2xl font-semibold mb-4">{{ selectedCamera.name }}</h2>
+
+          <!-- Images slideshow (no animation) -->
+          <!-- Images slideshow (no animation) -->
+          <div *ngIf="selectedCamera && selectedCamera.images && selectedCamera.images.length > 0" class="relative mb-4 w-full h-64 overflow-hidden rounded border">
+            <img 
+              [src]="selectedCamera.images[currentImageIndex]" 
+              alt="Camera Image" 
+              class="w-full h-full object-contain rounded"
+            />
+            
+            <!-- Prev Button -->
+            <div class="absolute top-1/2 left-2 transform -translate-y-1/2 z-10">
+              <button 
+                (click)="prevImage()" 
+                class="text-white bg-black bg-opacity-50 p-2 rounded-full hover:bg-opacity-80"
+              >
+                ‹
+              </button>
+            </div>
+
+            <!-- Next Button -->
+            <div class="absolute top-1/2 right-2 transform -translate-y-1/2 z-10">
+              <button 
+                (click)="nextImage()" 
+                class="text-white bg-black bg-opacity-50 p-2 rounded-full hover:bg-opacity-80"
+              >
+                ›
+              </button>
+            </div>
+          </div>
+
+
+          <!-- Camera Info -->
+          <div class="space-y-2 text-sm text-gray-700">
+            <div><strong>Brand:</strong> {{ selectedCamera.brand }}</div>
+            <div><strong>Model:</strong> {{ selectedCamera.model }}</div>
+            <div><strong>Category:</strong> {{ selectedCamera.category }}</div>
+            <div><strong>Description:</strong> {{ selectedCamera.description }}</div>
+            <div><strong>Features:</strong> 
+              <ul class="list-disc pl-5">
+                <li *ngFor="let feature of selectedCamera.features">{{ feature }}</li>
+              </ul>
+            </div>
+            <div><strong>Rent Per Day:</strong> ₹{{ selectedCamera.rentPerDay }}</div>
+            <div><strong>Availability:</strong> 
+              <span [ngClass]="{
+                'text-green-600 font-semibold': selectedCamera.availability,
+                'text-red-600 font-semibold': !selectedCamera.availability
+              }">
+                {{ selectedCamera.availability ? 'Available' : 'Unavailable' }}
+              </span>
+            </div>
+            <div><strong>Stock Quantity:</strong> {{ selectedCamera.stockQuantity }}</div>
+            <div><strong>Rating:</strong> {{ selectedCamera.averageRating || 'Not rated yet' }}</div>
+          </div>
+
+        </div>
+        </div>
+
+
+
+
+
+    </div>
+  </div>
+  
